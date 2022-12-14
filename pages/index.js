@@ -9,7 +9,7 @@ import { async } from '@firebase/util';
 
 function Exercise(props) {
   return <Link href={{
-    pathname: "/ExerciseHistory",
+    pathname: "/exerciseHistory",
     query: { name: props.name }
   }
   }><div className='exerciseTile'>{props.name}</div></Link>
