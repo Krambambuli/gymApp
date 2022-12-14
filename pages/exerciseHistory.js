@@ -11,7 +11,7 @@ import { writeSet, getWorkoutHistory } from './api/firestore';
 import { useEffect, useState } from 'react';
 import PopUp from '../components/popUp';
 
-export default function exerciseHistory() {
+export default function ExerciseHistory() {
   const [showPopUp, setShowPopUp] = useState(false);
   const [sets, setSets] = useState({})
   const [date, setDate] = useState({})
@@ -61,16 +61,16 @@ export default function exerciseHistory() {
         <th>Kg</th>
       </tr>
       {/* Day 1 */}
-      {!loadingHistory && history.map((day, index) => <><tr>
+      {!loadingHistory && history.map((day, index) => <div key={index}><tr>
         <td rowSpan={Object.keys(day.sets).length + 1}>{day.date.toLocaleDateString()} 
         <button onClick={() => openPopup(history[index])}>edit</button></td>
       </tr>
-        {Object.keys(day.sets).map((s) => <tr>
+        {Object.keys(day.sets).map((s) => <tr key={s}>
           <td>{s}</td>
           <td>{day.sets[s].reps}</td>
           <td>{day.sets[s].kg}</td>
         </tr>)}
-      </>)}
+      </div>)}
     </table>
     <button onClick={() => openPopup({date: new Date(), sets: {1: {kg: 0, reps: 0}}})}>
       add

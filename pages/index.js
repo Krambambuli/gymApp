@@ -9,7 +9,7 @@ import { async } from '@firebase/util';
 
 function Exercise(props) {
   return <Link href={{
-    pathname: "/exerciseHistory",
+    pathname: "/ExerciseHistory",
     query: { name: props.name }
   }
   }><div className='exerciseTile'>{props.name}</div></Link>
@@ -55,20 +55,20 @@ export default function Home() {
       <section>
         <p className='dayTitle'>Monday</p>
         <div className='exerciseGrid'>
-          {!loading && push.map((exercise) => <Exercise name={exercise} />)}
+          {!loading && push.map((exercise) => <Exercise key={exercise} name={exercise} />)}
         </div>
       </section>
 
       <section>
         <p className='dayTitle' id='tuesday'>Tuesday</p>
         <div className='exerciseGrid'>
-          {!loading && pull.map((exercise) => <Exercise name={exercise} />)}
+          {!loading && pull.map((exercise) => <Exercise key={exercise} name={exercise} />)}
         </div>
       </section>
       <section>
         <p className='dayTitle' id='tuesday'>Wednesday</p>
         <div className='exerciseGrid'>
-          {!loading && legs.map((exercise) => <Exercise name={exercise} />)}
+          {!loading && legs.map((exercise) => <Exercise key={exercise} name={exercise} />)}
         </div>
       </section>
       <section>
@@ -80,19 +80,19 @@ export default function Home() {
       <section>
         <p className='dayTitle' id='tuesday'>Friday</p>
         <div className='exerciseGrid'>
-          {!loading && push.map((exercise) => <Exercise name={exercise} />)}
+          {!loading && push.map((exercise) => <Exercise key={exercise} name={exercise} />)}
         </div>
       </section>
       <section>
         <p className='dayTitle' id='tuesday'>Saturday</p>
         <div className='exerciseGrid'>
-          {!loading && pull.map((exercise) => <Exercise name={exercise} />)}
+          {!loading && pull.map((exercise) => <Exercise key={exercise} name={exercise} />)}
         </div>
       </section>
       <section>
         <p className='dayTitle' id='tuesday'>Sunday</p>
         <div className='exerciseGrid'>
-          {!loading && legs.map((exercise) => <Exercise name={exercise} />)}
+          {!loading && legs.map((exercise) => <Exercise key={exercise} name={exercise} />)}
         </div>
       </section>
       

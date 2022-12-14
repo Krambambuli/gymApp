@@ -69,7 +69,7 @@ export default function PopUp(props) {
                         <th>kg</th>
                     </tr>
                     {Object.keys(amountOfSets).map(set => {
-                        return <tr>
+                        return <tr key={set}>
                             <th>Set {set}</th>
                             <td>
                                 <input
