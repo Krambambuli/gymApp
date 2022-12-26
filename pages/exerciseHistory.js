@@ -50,17 +50,43 @@ export default function ExerciseHistory() {
 
   const router = useRouter();
   //make it readable to specify wich var for whiyh thing
-  return (<div style={{ display: 'flex', alignContent: 'space-between', flexDirection: 'column' }}>
+  return (<div className="historyMain background">
     <Link href="/">back</Link>
     {router.query.name}
-    <table>
+    <div className='historyTable'>
+      <div className='header'>
+        <div style={{flexBasis: '40%'}}>Date</div>
+        <div className='headerPart2'>
+        <div>Set</div>
+        <div >Rep</div>
+        <div >Kg</div>
+        </div>
+      </div>
+      <div className='content'>
+      {!loadingHistory && history.map((day, index) => <div className='day' key={index}>
+        <div className='date' style={{flexBasis: '40%'}}>
+          <p>{day.date.toLocaleDateString()}</p> 
+          <button onClick={() => openPopup(history[index])}>edit</button>
+        </div>
+        <div className='setGroup' style={{flexBasis: '60%'}}>
+        {Object.keys(day.sets).map((s) => <div className="set" key={s}>
+          <p className='setNumber'>{s}</p>
+          <p className='reps'>{day.sets[s].reps}</p>
+          <p className='kg'>{day.sets[s].kg}</p>
+        </div>)}
+        </div>
+      </div>)}
+      </div>
+    </div>
+
+
+    {/* <table>
       <tr>
         <th>Date</th>
         <th>Set</th>
         <th>Rep</th>
         <th>Kg</th>
       </tr>
-      {/* Day 1 */}
       {!loadingHistory && history.map((day, index) => <div key={index}><tr>
         <td rowSpan={Object.keys(day.sets).length + 1}>{day.date.toLocaleDateString()} 
         <button onClick={() => openPopup(history[index])}>edit</button></td>
@@ -71,7 +97,7 @@ export default function ExerciseHistory() {
           <td>{day.sets[s].kg}</td>
         </tr>)}
       </div>)}
-    </table>
+    </table> */}
     <button onClick={() => openPopup({date: new Date(), sets: {1: {kg: 0, reps: 0}}})}>
       add
     </button>

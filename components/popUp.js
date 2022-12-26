@@ -58,11 +58,33 @@ export default function PopUp(props) {
         {/* https://react-hook-form.com/get-started */}
         {/* https://stackoverflow.com/questions/67150288/event-in-javascript-is-deprecated-and-i-cannot-use-preventdefault */}
         <form onSubmit={handleSubmit}>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px'}}>
                 {/* todo */}
                 {/* maybe use grid insted Table */}
                 {/* use Input */}
-                <table>
+                <div style={{display: 'flex', justifyContent: 'space-around'}}>
+                    <p>reps</p>
+                    <p>kg</p>
+                </div>
+                {Object.keys(amountOfSets).map(set => {
+                        return <div style={{display: 'flex', justifyContent: 'space-around'}} key={set}>
+                                <input
+                                    className='inputField'
+                                    type={'number'}
+                                    id={`set_${set}_reps`}
+                                    name={`set_${set}_reps`}
+                                    defaultValue={amountOfSets[set].reps}
+                                />
+                                <input
+                                    className='inputField'
+                                    type={'number'}
+                                    id={`set_${set}_kg`}
+                                    name={`set_${set}_kg`}
+                                    defaultValue={amountOfSets[set].kg}
+                                />
+                        </div>
+                    })}
+                {/* <table>
                     <tr>
                         <th> </th>
                         <th>reps</th>
@@ -73,7 +95,7 @@ export default function PopUp(props) {
                             <th>Set {set}</th>
                             <td>
                                 <input
-                                    type={'text'}
+                                    type={'number'}
                                     id={`set_${set}_reps`}
                                     name={`set_${set}_reps`}
                                     defaultValue={amountOfSets[set].reps}
@@ -81,7 +103,7 @@ export default function PopUp(props) {
                             </td>
                             <td>
                                 <input
-                                    type={'text'}
+                                    type={'number'}
                                     id={`set_${set}_kg`}
                                     name={`set_${set}_kg`}
                                     defaultValue={amountOfSets[set].kg}
@@ -89,7 +111,7 @@ export default function PopUp(props) {
                             </td>
                         </tr>
                     })}
-                </table>
+                </table> */}
 
                 <button type={'button'} onClick={() => addSet()}>Add Set</button>
                 <button type={'button'} onClick={() => removeSet()}>Remove Set</button>
