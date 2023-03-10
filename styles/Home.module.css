@@ -1,4 +1,4 @@
-.container {
+/* .container {
   min-height: 100vh;
   padding: 0 0.5rem;
   display: flex;
@@ -120,4 +120,34 @@
     width: 100%;
     flex-direction: column;
   }
+} */
+.dayTitle {
+  font-size: 50px;
+  color: white;
+  background-color: rgba(31, 30, 30, 0.753);
+  margin: 0 0 25px 0;
+  padding: 10px 0;
+  text-align: center;
+ }
+
+.exerciseGrid {
+  display: grid;
+  height: 100%;
+  grid-template-columns: 49% 49%;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 2%;
+  /* border: 1px solid red; */
+  margin: 2% 5%;
+}
+
+.exerciseTile {
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.404);
+  border-width: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(54, 54, 54);
+  color: white;
+  border-radius: 10%;
 }
