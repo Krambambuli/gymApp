@@ -58,7 +58,7 @@ export async function getStaticPaths() {
 
 function CreateRow(props) {
   const { row } = props;
-  // const {openPopup} = props;
+  const {openPopup} = props;
 
   const [openRow, setOpenRow] = useState(false);
   return (
@@ -80,7 +80,7 @@ function CreateRow(props) {
           <IconButton
             aria-label="expand row"
             size="small"
-          // onClick={() => openPopup(row)}
+            onClick={() => openPopup({date: row.date, sets: row.sets})}
           >
             <EditIcon />
           </IconButton>
@@ -123,11 +123,12 @@ export default function Exercise({ exerciseHistory, name }) {
   const router = useRouter();
   const [showPopUp, setShowPopUp] = useState(false);
   const [sets, setSets] = useState({})
-  const [date, setDate] = useState({})
+  const [date, setDate] = useState(false)
 
   const toggleShowPopUp = () => setShowPopUp(!showPopUp);
 
   const openPopup = (day) => {
+    console.log('day', day);
     setSets(day.sets);
     setDate(day.date);
     toggleShowPopUp();
@@ -152,7 +153,7 @@ export default function Exercise({ exerciseHistory, name }) {
           </TableHead>
           <TableBody>
             {exerciseHistory.map((row) => (
-              <CreateRow key={row.date} row={row} />
+              <CreateRow key={row.date} row={row} openPopup={(d) => openPopup(d)} />
               // openPopup={() => openPopup()}
             ))}
           </TableBody>
@@ -162,7 +163,8 @@ export default function Exercise({ exerciseHistory, name }) {
         color="primary"
         aria-label="add"
         // onClick={() => toggleShowPopUp()}
-        onClick={() => openPopup({date: new Date(), sets: {1: {kg: 0, reps: 0}}})}
+        // maybe format date already here? check how it influancesid generation or maybe reformat date from exercisehistory to date again
+        onClick={() => openPopup({ date: new Date(), sets: { 1: { kg: 0, reps: 0 } } })}
         sx={{
           position: 'fixed',
           bottom: '65px',
@@ -170,7 +172,6 @@ export default function Exercise({ exerciseHistory, name }) {
         }}>
         <AddIcon />
       </Fab>
-      {/* <Button onClick={openPopup({date: new Date(), sets: {1: {kg: 0, reps: 0}}})}>+</Button> */}
       {/* maybe put modal in an other component */}
       <Modal
         open={showPopUp}
@@ -190,7 +191,7 @@ export default function Exercise({ exerciseHistory, name }) {
           p: 4,
         }}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            
+            {/* {date && date.toLocaleDateString() ? date.toLocaleDateString() : date} */}
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
             Duis mollis, est non commodo luctus, nisi erat porttitor ligula.

@@ -27,12 +27,12 @@ const firebaseApp = initializeApp({
 const db = getFirestore(firebaseApp);
 
 //todo
-function formatDate(date) {
+function formatDate(date, id) {
     const year = date.getFullYear();
     const month = ('0' + (date.getMonth() + 1)).slice(-2);
     const day = ('0' + date.getDate()).slice(-2);
 
-    return `${year}${month}${day}`
+    return id ? `${year}${month}${day}` : `${year}-${month}-${day}`
 }
 
 // todo 
@@ -52,7 +52,7 @@ export async function writeDay({ date, exercise, sets } = {}) {
     // } catch (e) {
     //     console.log(`I got an error! ${e}`);
     // }
-    const dateId = formatDate(date);
+    const dateId = formatDate(date, true);
     const setPath = doc(db, 'exercises', exercise, 'set', dateId);
     const docData = {
         date: Timestamp.fromDate(date),
@@ -72,21 +72,21 @@ export async function writeDay({ date, exercise, sets } = {}) {
 //reconstruate Snapshot that every date is together and stuff
 export async function getWorkoutHistory(exercise) {
     const content = [];
+    const cleanedContent = [];
     const q = query(collection(db, 'exercises', exercise, 'set'));
     try {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-            let newData = {...doc.data()}
-            // this is stupid
-             newData.date = formatDate(doc.data().date.toDate());
-
-            // doc.data() is never undefined for query doc snapshots
-            // console.log(doc.id, " => ", doc.data());
-
-            content.push(newData)
+            content.push(doc.data())
         });
         console.log(content);
-        return content;
+        const sortedContent = content.sort((w1,w2) => (w1.date < w2.date) ? 1 : (w1.date > w2.date) ? -1 : 0)
+        sortedContent.map(workout => {
+            let newData = {...workout}
+            newData.date = formatDate(workout.date.toDate());
+            cleanedContent.push(newData);
+        })
+        return cleanedContent;
     } catch (e) {
         console.log(`I got an error! ${e}`);
     }
