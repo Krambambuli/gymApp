@@ -40,7 +40,12 @@ export default function Home({exerciseData}) {
                     <Paper 
                     sx={{
                       width: '100%',
-                      height: '100%'
+                      height: '100%',
+                      opacity: 0.9,
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                      color: 'white',
+                      backgroundColor: '#1f1e1e',
                     }}
                     elevation={5}
                     >

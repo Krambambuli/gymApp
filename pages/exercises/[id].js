@@ -1,6 +1,5 @@
 // react
-import { useState } from 'react'
-import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react'
 // components
 import Layout from '../../components/layout';
 import DayModal from '../../components/dayModal'
@@ -8,6 +7,7 @@ import DayModal from '../../components/dayModal'
 import { writeSet, getWorkoutHistory, getAllExerciseIds, formatDate, writeDay } from '../../utils/firestore';
 // nextJS
 import NextLink from 'next/link'
+import {useRouter} from 'next/router'
 // mui
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
@@ -36,17 +36,11 @@ import InputLabel from '@mui/material/InputLabel';
 
 
 // todo 
-// use Modal from mui for pop up
-// use table from mui 
-// maybe not static caouse updatet in app
+// make not static
+// use effect to fetch and stuff
 export async function getStaticProps({ params }) {
-  console.log('params', params)
-  const exerciseHistory = await getWorkoutHistory(params.id)
-  console.log('exerciseHistory', exerciseHistory)
-// use revalidate after adding or editing
   return {
     props: {
-      exerciseHistory,
       name: params.id
     },
   };
@@ -57,7 +51,7 @@ export async function getStaticProps({ params }) {
 
 export async function getStaticPaths() {
   const paths = await getAllExerciseIds();
-  console.log('paths are: ', paths)
+  // console.log('paths are: ', paths)
   return {
     paths,
     fallback: true, // or blocking
@@ -86,7 +80,7 @@ function CreateRow(props) {
         </TableCell>
         <TableCell align="right">
           <IconButton
-            aria-label="expand row"
+            aria-label="edit row"
             size="small"
             onClick={() => openPopup({ date: row.date, sets: row.sets })}
           >
@@ -98,7 +92,7 @@ function CreateRow(props) {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={openRow} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <Table size="small" aria-label="purchases">
+              <Table size="small" aria-label="sets">
                 <TableHead>
                   <TableRow>
                     <TableCell align='center'>Set</TableCell>
@@ -126,12 +120,32 @@ function CreateRow(props) {
   );
 }
 
-export default function Exercise({ exerciseHistory, name }) {
-
+export default function Exercise( {name} ) {
   const router = useRouter();
+  const [history, setHistory] = useState([])
+  const [loadingHistory, setLoadingHistory] = useState(true)
+  // for Modal
   const [showPopUp, setShowPopUp] = useState(false);
   const [sets, setSets] = useState({})
   const [date, setDate] = useState({})
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const resHistory = await getWorkoutHistory(name);
+        setHistory(resHistory)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    fetchHistory()
+    setLoadingHistory(false);
+  
+    // return () => {
+    //   second
+    // }
+  }, [loadingHistory])
+  
 
   const toggleShowPopUp = () => setShowPopUp(!showPopUp);
 
@@ -166,18 +180,18 @@ export default function Exercise({ exerciseHistory, name }) {
       newSets[set] = {
         kg: event.target[`set_${set}_kg`].value,
         reps: event.target[`set_${set}_reps`].value
-    }
+      }
     })
     await writeDay({
-        date,
-        exercise: name,
-        sets: newSets
+      date,
+      exercise: name,
+      sets: newSets
     });
+    toggleShowPopUp();
+    setLoadingHistory(true);
+  }
 
-    // toggleShowPopUp();
-}
-
-  console.log('this is inside exercisehistory', exerciseHistory)
+  console.log('this is inside exercisehistory', history)
   console.log('this is inside name', name)
   if (router.isFallback) {
     return <div>loading...</div>
@@ -195,7 +209,7 @@ export default function Exercise({ exerciseHistory, name }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {exerciseHistory.map((row) => (
+            {!loadingHistory && history.map((row) => (
               <CreateRow key={row.date} row={row} openPopup={(d) => openPopup(d)} />
               // openPopup={() => openPopup()}
             ))}
@@ -205,7 +219,7 @@ export default function Exercise({ exerciseHistory, name }) {
       <Fab
         color="primary"
         aria-label="add"
-        // maybe format date already here? check how it influancesid generation or maybe reformat date from exercisehistory to date again
+        // maybe format date already here? check how it influancesid generation or maybe reformat date from history to date again
         onClick={() => openPopup({ date: formatDate(new Date()), sets: { 1: { kg: 0, reps: 0 } } })}
         sx={{
           position: 'fixed',

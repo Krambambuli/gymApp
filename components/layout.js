@@ -21,8 +21,8 @@ export default function Layout({ children }) {
 
     const handleChange = (event, newValue) => {
         // change page with nextjs
-        router.push(newValue);
         setValue(newValue);
+        router.push(newValue);
     };
 
     return (

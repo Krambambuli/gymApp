@@ -151,6 +151,21 @@ export async function writeNewExercise(exerciseName, category, seatPosition, day
 
 }
 
+export async function editExercise(exercise, days){
+    const setPath = doc(db, 'exercises', exercise);
+    const docData = {
+        days
+    }
+
+    // docData[set] = {kg, reps};
+    try {
+        await setDoc(setPath, docData, { merge: true });
+        console.log(`this value has been written to the database`);
+    } catch (e) {
+        console.log(`I got an error! ${e}`);
+    }
+}
+
 
 //todo
 // editSet()
