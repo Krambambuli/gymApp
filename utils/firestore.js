@@ -10,7 +10,8 @@ import {
     query,
     where,
     getCollections,
-    Timestamp
+    Timestamp,
+    orderBy
 } from 'firebase/firestore';
 
 // use an env file
@@ -27,12 +28,12 @@ const firebaseApp = initializeApp({
 const db = getFirestore(firebaseApp);
 
 //todo
-function formatDate(date, id) {
+export function formatDate(date) {
     const year = date.getFullYear();
     const month = ('0' + (date.getMonth() + 1)).slice(-2);
     const day = ('0' + date.getDate()).slice(-2);
 
-    return id ? `${year}${month}${day}` : `${year}-${month}-${day}`
+    return `${year}-${month}-${day}`
 }
 
 // todo 
@@ -52,10 +53,13 @@ export async function writeDay({ date, exercise, sets } = {}) {
     // } catch (e) {
     //     console.log(`I got an error! ${e}`);
     // }
-    const dateId = formatDate(date, true);
+
+    const dateId = date.replaceAll("-", "");
+    console.log('date id = ', dateId)
     const setPath = doc(db, 'exercises', exercise, 'set', dateId);
     const docData = {
-        date: Timestamp.fromDate(date),
+        date: Timestamp.fromDate(new Date(date)),
+        // date: date,
         sets
     };
 
@@ -72,21 +76,17 @@ export async function writeDay({ date, exercise, sets } = {}) {
 //reconstruate Snapshot that every date is together and stuff
 export async function getWorkoutHistory(exercise) {
     const content = [];
-    const cleanedContent = [];
-    const q = query(collection(db, 'exercises', exercise, 'set'));
+    // const cleanedContent = [];
+    const q = query(collection(db, 'exercises', exercise, 'set'), orderBy("date", "desc"));
     try {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-            content.push(doc.data())
+            let newData = {...doc.data()}
+            newData.date = formatDate(doc.data().date.toDate());
+            content.push(newData)
         });
         console.log(content);
-        const sortedContent = content.sort((w1,w2) => (w1.date < w2.date) ? 1 : (w1.date > w2.date) ? -1 : 0)
-        sortedContent.map(workout => {
-            let newData = {...workout}
-            newData.date = formatDate(workout.date.toDate());
-            cleanedContent.push(newData);
-        })
-        return cleanedContent;
+        return content;
     } catch (e) {
         console.log(`I got an error! ${e}`);
     }

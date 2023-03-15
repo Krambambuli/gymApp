@@ -1,10 +1,11 @@
 // react
 import { useState } from 'react'
 import { useRouter } from 'next/router';
-// css
+// components
 import Layout from '../../components/layout';
+import DayModal from '../../components/dayModal'
 // firebase
-import { writeSet, getWorkoutHistory, getAllExerciseIds } from '../../utils/firestore';
+import { writeSet, getWorkoutHistory, getAllExerciseIds, formatDate, writeDay } from '../../utils/firestore';
 // nextJS
 import NextLink from 'next/link'
 // mui
@@ -22,10 +23,17 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
+import Typography from '@mui/material/Typography';
+import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import FormControl, { useFormControl } from '@mui/material/FormControl';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import FormHelperText from '@mui/material/FormHelperText';
+import InputLabel from '@mui/material/InputLabel';
+
 
 // todo 
 // use Modal from mui for pop up
@@ -35,7 +43,7 @@ export async function getStaticProps({ params }) {
   console.log('params', params)
   const exerciseHistory = await getWorkoutHistory(params.id)
   console.log('exerciseHistory', exerciseHistory)
-  //   const postData = await getPostData(params.id);
+// use revalidate after adding or editing
   return {
     props: {
       exerciseHistory,
@@ -52,13 +60,13 @@ export async function getStaticPaths() {
   console.log('paths are: ', paths)
   return {
     paths,
-    fallback: true,
+    fallback: true, // or blocking
   };
 }
 
 function CreateRow(props) {
   const { row } = props;
-  const {openPopup} = props;
+  const { openPopup } = props;
 
   const [openRow, setOpenRow] = useState(false);
   return (
@@ -80,7 +88,7 @@ function CreateRow(props) {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => openPopup({date: row.date, sets: row.sets})}
+            onClick={() => openPopup({ date: row.date, sets: row.sets })}
           >
             <EditIcon />
           </IconButton>
@@ -123,7 +131,7 @@ export default function Exercise({ exerciseHistory, name }) {
   const router = useRouter();
   const [showPopUp, setShowPopUp] = useState(false);
   const [sets, setSets] = useState({})
-  const [date, setDate] = useState(false)
+  const [date, setDate] = useState({})
 
   const toggleShowPopUp = () => setShowPopUp(!showPopUp);
 
@@ -133,6 +141,41 @@ export default function Exercise({ exerciseHistory, name }) {
     setDate(day.date);
     toggleShowPopUp();
   }
+
+  function addSet() {
+    const refamountOfSets = { ...sets };
+    refamountOfSets[Object.keys(refamountOfSets).length + 1] = { kg: 0, reps: 0 };
+    console.log('refamountOfSets', refamountOfSets);
+    setSets(refamountOfSets);
+  }
+
+  function removeSet() {
+    if (Object.keys(sets).length > 1) {
+      const refamountOfSets = { ...sets };
+      delete refamountOfSets[Object.keys(refamountOfSets).length];
+      console.log('refamountOfSets', refamountOfSets);
+      setSets(refamountOfSets);
+    }
+  }
+
+  async function handleSubmit(event) {
+    console.log('it works');
+    event.preventDefault();
+    const newSets = {}
+    Object.keys(sets).map(set => {
+      newSets[set] = {
+        kg: event.target[`set_${set}_kg`].value,
+        reps: event.target[`set_${set}_reps`].value
+    }
+    })
+    await writeDay({
+        date,
+        exercise: name,
+        sets: newSets
+    });
+
+    // toggleShowPopUp();
+}
 
   console.log('this is inside exercisehistory', exerciseHistory)
   console.log('this is inside name', name)
@@ -162,9 +205,8 @@ export default function Exercise({ exerciseHistory, name }) {
       <Fab
         color="primary"
         aria-label="add"
-        // onClick={() => toggleShowPopUp()}
         // maybe format date already here? check how it influancesid generation or maybe reformat date from exercisehistory to date again
-        onClick={() => openPopup({ date: new Date(), sets: { 1: { kg: 0, reps: 0 } } })}
+        onClick={() => openPopup({ date: formatDate(new Date()), sets: { 1: { kg: 0, reps: 0 } } })}
         sx={{
           position: 'fixed',
           bottom: '65px',
@@ -173,29 +215,74 @@ export default function Exercise({ exerciseHistory, name }) {
         <AddIcon />
       </Fab>
       {/* maybe put modal in an other component */}
+      {/* {showPopUp && <DayModal
+        show={showPopUp} 
+        toggleShow={() => toggleShowPopUp()}
+        exercise={name}
+        sets={sets}
+        date={date} />} */}
       <Modal
         open={showPopUp}
         onClose={() => toggleShowPopUp()}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 400,
-          bgcolor: 'background.paper',
-          border: '2px solid #000',
-          boxShadow: 24,
-          p: 4,
-        }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            {/* {date && date.toLocaleDateString() ? date.toLocaleDateString() : date} */}
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            border: '2px solid #000',
+            boxShadow: 24,
+            p: 4,
+          }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography id="modal-modal-title" variant="h6" component="h2">
+                {date}
+              </Typography>
+            </Grid>
+            {Object.keys(sets).map(set => {
+              console.log('this is what is inside set', set)
+              return <Grid container item spacing={1} sx={12}>
+                <Grid item md={2}>
+                  {set}.
+                </Grid>
+                <Grid container item spacing={1} md={10} sm={12}>
+                  <Grid item xs={6}>
+                    <TextField
+                      id={`set_${set}_reps`}
+                      label="Reps"
+                      type="number"
+                      defaultValue={sets[set].reps}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      id={`set_${set}_kg`}
+                      label="Kg"
+                      type="number"
+                      defaultValue={sets[set].kg}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+            })}
+            <Grid item md={6} sm={12}>
+              <Button variant="contained" onClick={() => removeSet()}>remove Set</Button>
+            </Grid>
+            <Grid item md={6} sm={12}>
+              <Button variant="contained" onClick={() => addSet()}>add Set</Button>
+            </Grid>
+            <Grid item sx={12}>
+              <Button type='submit' >Submit</Button>
+            </Grid>
+          </Grid>
         </Box>
       </Modal>
     </Layout>
