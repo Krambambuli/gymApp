@@ -1,3 +1,4 @@
+import React, {useState, useEffect} from 'react'
 import styles from '../styles/Home.module.css';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
@@ -7,6 +8,7 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import NextLink from 'next/link';
+import { useRouter } from 'next/router'
 
 // todo use material ui grid 
 // static props could go wrong bc there can be changes to it 
@@ -23,7 +25,16 @@ export async function getStaticProps() {
 }
 
 export default function Home({exerciseData}) {
+  const router = useRouter()
+
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+  useEffect(() => {
+    const d = new Date().getDay() - 1
+    console.log('date', days[d])
+    router.push(`/#${days[d]}`);
+  }, [])
+  
 
   return (
     <Layout>
