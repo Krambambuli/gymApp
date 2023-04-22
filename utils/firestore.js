@@ -64,11 +64,20 @@ export async function writeDay({ date, exercise, sets } = {}) {
     };
 
     // docData[set] = {kg, reps};
+    //merge true necessary?
     try {
         await setDoc(setPath, docData, { merge: true });
         console.log(`this value has been written to the database`);
     } catch (e) {
         console.log(`I got an error! ${e}`);
+    }
+
+    try {
+        await setDoc(doc(db, 'exercises', exercise), 
+        { latest:  date},
+        { merge: true })
+    } catch (e){
+        console.log('I got an error!', e)
     }
 }
 
@@ -81,7 +90,7 @@ export async function getWorkoutHistory(exercise) {
     try {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-            let newData = {...doc.data()}
+            let newData = { ...doc.data() }
             newData.date = formatDate(doc.data().date.toDate());
             content.push(newData)
         });
@@ -92,6 +101,7 @@ export async function getWorkoutHistory(exercise) {
     }
 }
 
+// used?
 export async function getExercisesByCategory(category) {
     //const reps = doc(db, 'exercises', exercise , day , 'sets');
     const exercises = [];
@@ -111,7 +121,7 @@ export async function getExercisesByCategory(category) {
     }
 }
 
-export async function getAllExercises(){
+export async function getAllExercises() {
     const exercises = [];
     const q = query(collection(db, 'exercises'));
     try {
@@ -120,7 +130,7 @@ export async function getAllExercises(){
         querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
             console.log(doc.id, " => ", doc.data());
-            exercises.push({id: doc.id, ...doc.data()});
+            exercises.push({ id: doc.id, ...doc.data() });
         });
         console.log(exercises)
         return exercises;
@@ -129,7 +139,7 @@ export async function getAllExercises(){
     }
 }
 
-export async function getAllExerciseIds(){
+export async function getAllExerciseIds() {
     const exercises = [];
     const q = query(collection(db, 'exercises'));
     try {
@@ -138,7 +148,7 @@ export async function getAllExerciseIds(){
         querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
             console.log(doc.id, " => ", doc.data());
-            exercises.push({params: {id: doc.id}});
+            exercises.push({ params: { id: doc.id } });
         });
         console.log(exercises)
         return exercises;
@@ -147,17 +157,15 @@ export async function getAllExerciseIds(){
     }
 }
 
-export async function writeNewExercise(exerciseName, category, seatPosition, day){
-
-}
-
-export async function editExercise(exercise, days){
+export async function writeExercise({exercise, days, seatPosition, category}) {
+    console.log('exercise', exercise)
     const setPath = doc(db, 'exercises', exercise);
     const docData = {
-        days
+        days, 
+        seatPosition, 
+        category
     }
 
-    // docData[set] = {kg, reps};
     try {
         await setDoc(setPath, docData, { merge: true });
         console.log(`this value has been written to the database`);
@@ -168,5 +176,4 @@ export async function editExercise(exercise, days){
 
 
 //todo
-// editSet()
 // removeSet()

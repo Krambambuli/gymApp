@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import '../styles/globals.css'
 import { AppProps } from 'next/app'
+import { AppWrapper } from '../utils/context';
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const AnyComponent = Component as any;
@@ -33,7 +34,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <link rel="apple-touch-icon" href="/apple-icon.png"></link>
         <meta name="theme-color" content="#317EFB" />
       </Head>
-      <AnyComponent {...pageProps} />
+      <AppWrapper>
+        <AnyComponent {...pageProps} />
+      </AppWrapper>
     </>
   )
 }

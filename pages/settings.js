@@ -1,7 +1,7 @@
 // file to have a scrollable list with all exercises and possibility to edit category (push, pull, leg), add new exercise, change rotation and s
 import React, { useState, useEffect } from 'react'
 import Layout from '../components/layout';
-import { getAllExercises, editExercise } from '../utils/firestore';
+import { getAllExercises, writeExercise } from '../utils/firestore';
 // mui
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
@@ -23,10 +23,8 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
-import FormControl, { useFormControl } from '@mui/material/FormControl';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import FormHelperText from '@mui/material/FormHelperText';
-import InputLabel from '@mui/material/InputLabel';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 // todo create component for table and maybe popup
 function CreateRow(props) {
@@ -34,6 +32,7 @@ function CreateRow(props) {
     const { openPopup } = props;
 
     const [openRow, setOpenRow] = useState(false);
+    console.log('row', row);
     return (
         <>
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
@@ -53,7 +52,7 @@ function CreateRow(props) {
                     <IconButton
                         aria-label="edit row"
                         size="small"
-                        onClick={() => openPopup({ id: row.id })}
+                        onClick={() => openPopup(row)}
                     >
                         <EditIcon />
                     </IconButton>
@@ -92,6 +91,13 @@ function CreateRow(props) {
 export default function Settings() {
     const [allExercises, setAllExercises] = useState([])
     const [loadingAllExercises, setLoadingAllExercises] = useState([])
+    //for Modal
+    //todo
+    const [showPopUp, setShowPopUp] = useState(false);
+    const [exercise, setExercise] = useState('')
+    const [category, setCategory] = useState('')
+    const [seatPosition, setSeatPosition] = useState(0)
+    const [days, setDays] = useState([])
 
     useEffect(() => {
         const fetchAllExercises = async () => {
@@ -110,27 +116,74 @@ export default function Settings() {
         // }
     }, [loadingAllExercises])
 
-    const fillDays = async () => {
-        console.log('*****')
-        console.log('its doing it')
-        const exercisedPairedWithDays = {};
-        allExercises.map((e) => {
-            switch (e.category) {
-                case 'pull':
-                    return exercisedPairedWithDays[e.id] = ['monday', 'thursday'];
-                case 'push':
-                    return exercisedPairedWithDays[e.id] = ['tuesday', 'saturday'];
-                case 'legs':
-                    return exercisedPairedWithDays[e.id] = ['wednesday', 'sunday'];
-            }
-        })
-        console.log('exercisedPairedWithDays', exercisedPairedWithDays);
-        Object.keys(exercisedPairedWithDays).map( async (id) => {
-            console.log(`${id} => ${exercisedPairedWithDays[id]}`)
-            await editExercise(id, exercisedPairedWithDays[id]);
-        })
-        console.log('****')
+    const toggleShowPopUp = () => setShowPopUp(!showPopUp);
+
+    //todo
+    const openPopup = (e) => {
+        console.log('exercise', e);
+        setExercise(e.id)
+        setCategory(e.category)
+        setSeatPosition(e.seatPosition)
+        setDays(e.days)
+        toggleShowPopUp();
     }
+
+    //todo   
+    async function handleSubmit(event) {
+        event.preventDefault();
+        // const newSets = {}
+        // Object.keys(sets).map(set => {
+        //     newSets[set] = {
+        //         kg: event.target[`set_${set}_kg`].value,
+        //         reps: event.target[`set_${set}_reps`].value
+        //     }
+        // })
+        console.log('this is data: ', {
+            exercise: event.target.exercise.value,
+            days,
+            seatPosition: event.target.seat_position.value,
+            category
+        })
+        await writeExercise({
+            exercise: event.target.exercise.value,
+            days,
+            seatPosition: parseInt(event.target.seat_position.value),
+            category
+        });
+        toggleShowPopUp();
+        setLoadingAllExercises(true);
+    }
+
+    const handleDays = (event, newDays) => {
+        setDays(newDays);
+    };
+
+    const handleCategory = (event, newCategory) => {
+        setCategory(newCategory);
+    };
+
+    // was only necessary to bulk change some data
+    // const fillDays = async () => {
+    //     console.log('*****')
+    //     console.log('its doing it')
+    //     const exercisedPairedWithDays = {};
+    //     allExercises.map((e) => {
+    //         switch (e.category) {
+    //             case 'pull':
+    //                 return exercisedPairedWithDays[e.id] = ['monday', 'thursday'];
+    //             case 'push':
+    //                 return exercisedPairedWithDays[e.id] = ['tuesday', 'saturday'];
+    //             case 'legs':
+    //                 return exercisedPairedWithDays[e.id] = ['wednesday', 'sunday'];
+    //         }
+    //     })
+    //     console.log('exercisedPairedWithDays', exercisedPairedWithDays);
+    //     Object.keys(exercisedPairedWithDays).map(async (id) => {
+    //         console.log(`${id} => ${exercisedPairedWithDays[id]}`)
+    //         await editExercise(id, exercisedPairedWithDays[id]);
+    //     })
+    //     console.log('****')
+    // }
 
     console.log('allExercises', allExercises)
     return (
@@ -147,12 +200,143 @@ export default function Settings() {
                     </TableHead>
                     <TableBody>
                         {!loadingAllExercises && allExercises.map((row) => (
-                            <CreateRow key={row.id} row={row} openPopup={(d) => console.log(d)} />
+                            <CreateRow key={row.id} row={row} openPopup={(d) => openPopup(d)} />
                             // openPopup={() => openPopup()}
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
+            //todo
+            <Fab
+                color="primary"
+                aria-label="add"
+                // maybe format date already here? check how it influancesid generation or maybe reformat date from history to date again
+                onClick={() => openPopup({ id: ' ', category: ' ', days: [] })}
+                sx={{
+                    position: 'fixed',
+                    bottom: '65px',
+                    right: '15px',
+                }}>
+                <AddIcon />
+            </Fab>
+            {/* maybe put modal in an other component */}
+            {/* {showPopUp && <DayModal
+        show={showPopUp} 
+        toggleShow={() => toggleShowPopUp()}
+        exercise={name}
+        sets={sets}
+        date={date} />} */}
+            <Modal
+                open={showPopUp}
+                onClose={() => toggleShowPopUp()}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 400,
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
+                        p: 4,
+                    }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Typography id="modal-modal-title" variant="h6" component="h2">
+                                {exercise}
+                            </Typography>
+                        </Grid>
+                        <Grid container item spacing={1} sx={12}>
+                            <Grid item sm={12}>
+                                <TextField
+                                    id={`exercise`}
+                                    label="Exercise"
+                                    type="text"
+                                    defaultValue={exercise}
+                                />
+                            </Grid>
+                            <Grid item sm={12}>
+                                <TextField
+                                    id={`seat_position`}
+                                    label="seat Position"
+                                    type="number"
+                                    defaultValue={seatPosition}
+                                />
+                            </Grid>
+                            <Grid item md={2}>
+                                {category}.
+                                {days}.
+                            </Grid>
+                            <Grid item md={10} sm={12}>
+                                <ToggleButtonGroup
+                                    value={category}
+                                    exclusive
+                                    onChange={handleCategory}
+                                    aria-label="exercise category"
+                                >
+                                    <ToggleButton value="legs">legs</ToggleButton>
+                                    <ToggleButton value="pull">pull</ToggleButton>
+                                    <ToggleButton value="push">push</ToggleButton>
+                                </ToggleButtonGroup>
+                            </Grid>
+                            <Grid item md={2}>
+                                {days}.
+                            </Grid>
+                            <Grid item md={10} sm={12}>
+                                <ToggleButtonGroup
+                                    value={days}
+                                    orientation="vertical"
+                                    onChange={handleDays}
+                                    aria-label="exercise days"
+                                >
+                                    <ToggleButton value="monday">monday</ToggleButton>
+                                    <ToggleButton value="tuesday">tuesday</ToggleButton>
+                                    <ToggleButton value="wednesday">wednesday</ToggleButton>
+                                    <ToggleButton value="thursday">thursday</ToggleButton>
+                                    <ToggleButton value="friday">friday</ToggleButton>
+                                    <ToggleButton value="saturday">saturday</ToggleButton>
+                                    <ToggleButton value="sunday">sunday</ToggleButton>
+                                </ToggleButtonGroup>
+                            </Grid>
+                        </Grid>
+                        {/* {Object.keys(sets).map(set => {
+                            console.log('this is what is inside set', set)
+                            return <Grid container item spacing={1} sx={12}>
+                                <Grid item md={2}>
+                                    {set}.
+                                </Grid>
+                                <Grid container item spacing={1} md={10} sm={12}>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            id={`set_${set}_reps`}
+                                            label="Reps"
+                                            type="number"
+                                            defaultValue={sets[set].reps}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            id={`set_${set}_kg`}
+                                            label="Kg"
+                                            type="number"
+                                            defaultValue={sets[set].kg}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        })} */}
+                        <Grid item sm={12}>
+                            <Button type='submit' >Submit</Button>
+                        </Grid>
+                    </Grid>
+                </Box>
+            </Modal>
         </Layout>
     );
 }

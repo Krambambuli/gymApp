@@ -21,6 +21,7 @@ export default function Layout({ children }) {
 
     const handleChange = (event, newValue) => {
         // change page with nextjs
+        console.log('newValue', newValue);
         setValue(newValue);
         router.push(newValue);
     };
@@ -44,7 +45,7 @@ export default function Layout({ children }) {
             </Head>
             <main className={styles.workoutBackground}>{children}</main>
             <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={10}>
-            <BottomNavigation showLabels sx={{ justifyContent: 'space-around' }} value={value} onChange={handleChange}>
+            <BottomNavigation showLabels sx={{ justifyContent: 'space-around' }} value={value} onChange={(e, v) => handleChange(e, v)}>
                 <BottomNavigationAction
                     label="Settings"
                     value="/settings"

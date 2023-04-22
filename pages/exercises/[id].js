@@ -7,7 +7,7 @@ import DayModal from '../../components/dayModal'
 import { writeSet, getWorkoutHistory, getAllExerciseIds, formatDate, writeDay } from '../../utils/firestore';
 // nextJS
 import NextLink from 'next/link'
-import {useRouter} from 'next/router'
+import { useRouter } from 'next/router'
 // mui
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
@@ -120,10 +120,11 @@ function CreateRow(props) {
   );
 }
 
-export default function Exercise( {name} ) {
+export default function Exercise({ name }) {
   const router = useRouter();
   const [history, setHistory] = useState([])
   const [loadingHistory, setLoadingHistory] = useState(true)
+  // const exerciseDone = useAppContext();
   // for Modal
   const [showPopUp, setShowPopUp] = useState(false);
   const [sets, setSets] = useState({})
@@ -139,13 +140,14 @@ export default function Exercise( {name} ) {
       }
     }
     fetchHistory()
+    // use context to set if today already done
     setLoadingHistory(false);
-  
+
     // return () => {
     //   second
     // }
   }, [loadingHistory])
-  
+
 
   const toggleShowPopUp = () => setShowPopUp(!showPopUp);
 
@@ -173,7 +175,6 @@ export default function Exercise( {name} ) {
   }
 
   async function handleSubmit(event) {
-    console.log('it works');
     event.preventDefault();
     const newSets = {}
     Object.keys(sets).map(set => {

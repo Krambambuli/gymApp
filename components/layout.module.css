@@ -13,7 +13,7 @@
     margin: 3rem 0 0;
   } */
   .workoutBackground {
-    height: 100vh;
+    height: calc(100vh - 56px);
     width: 100vw;
     scroll-snap-type: y mandatory;
     overflow-y: scroll;

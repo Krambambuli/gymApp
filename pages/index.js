@@ -10,30 +10,52 @@ import CardContent from '@mui/material/CardContent';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router'
 
+
 // todo use material ui grid 
-// static props could go wrong bc there can be changes to it 
 //instead paper other ui component
+// static props could go wrong bc there can be changes to it 
+// not static
+// export async function getStaticProps() {
+//   const exerciseData = await getAllExercises();
+//   console.log('inside staticprops',  exerciseData)
+//   return {
+//     props: {
+//       exerciseData,
+//     },
+//   };
+// }
 
-export async function getStaticProps() {
-  const exerciseData = await getAllExercises();
-  console.log('inside staticprops',  exerciseData)
-  return {
-    props: {
-      exerciseData,
-    },
-  };
-}
-
-export default function Home({exerciseData}) {
+// export default function Home({exerciseData}) {
+export default function Home() {
   const router = useRouter()
+  const [exerciseData, setExerciseData] = useState([])
+  const [loadingExerciseData, setLoadingExerciseData] = useState(true)
+  const today = new Date()
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] 
 
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+  //check if it runs every page load so to fetch data here to
+  useEffect(() => {
+    router.push(`/#${days[today.getDay() - 1]}`);
+    // const exerciseData = await getAllExercises();
+  }, [])
 
   useEffect(() => {
-    const d = new Date().getDay() - 1
-    console.log('date', days[d])
-    router.push(`/#${days[d]}`);
-  }, [])
+    const fetchExerciseData = async () => {
+      try {
+        const resExerciseData = await getAllExercises();
+        setExerciseData(resExerciseData)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    fetchExerciseData()
+    // use context to set if today already done
+    setLoadingExerciseData(false);
+
+    // return () => {
+    //   second
+    // }
+  }, [loadingExerciseData])
   
 
   return (
@@ -49,14 +71,14 @@ export default function Home({exerciseData}) {
                   // <Card variant="outlined">{exercise.id}</Card>
                   <NextLink href={`/exercises/${exercise.id}`}>
                     <Paper 
-                    sx={{
+                    sx={ {
                       width: '100%',
                       height: '100%',
                       opacity: 0.9,
                       textAlign: 'center',
                       verticalAlign: 'middle',
                       color: 'white',
-                      backgroundColor: '#1f1e1e',
+                      backgroundColor: new Date(exercise.latest).toDateString() === today.toDateString() ? '#358d6c' : '#1f1e1e',
                     }}
                     elevation={5}
                     >
