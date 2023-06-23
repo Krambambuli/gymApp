@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import styles from '../styles/Home.module.css';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
@@ -31,23 +31,26 @@ export default function Home() {
   const [exerciseData, setExerciseData] = useState([])
   const [loadingExerciseData, setLoadingExerciseData] = useState(true)
   const today = new Date()
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] 
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+  const categorys = ['legs', 'push', 'pull'];
 
   //check if it runs every page load so to fetch data here to
-  useEffect(() => {
-    router.push(`/#${days[today.getDay() - 1]}`);
-    // const exerciseData = await getAllExercises();
-  }, [])
+  // useEffect(() => {
+  //   router.push(`/#${days[today.getDay() - 1]}`);
+  //   // const exerciseData = await getAllExercises();
+  // }, [])
 
   useEffect(() => {
     const fetchExerciseData = async () => {
       try {
         const resExerciseData = await getAllExercises();
+        // console.log('exerciseData', resExerciseData);
         setExerciseData(resExerciseData)
       } catch (e) {
         console.log(e)
       }
     }
+
     fetchExerciseData()
     // use context to set if today already done
     setLoadingExerciseData(false);
@@ -56,18 +59,48 @@ export default function Home() {
     //   second
     // }
   }, [loadingExerciseData])
-  
+
 
   return (
     <Layout>
-    {/* <div className={styles.workout}> */}
+      {/* <div className={styles.workout}> */}
       {
-        days.map((day) => <section>
-          <p className={styles.dayTitle} id={day}>{day.toUpperCase()}</p>
+        // days.map((day) => <section>
+        //   <p className={styles.dayTitle} id={day}>{day.toUpperCase()}</p>
+        //   <div className={styles.exerciseGrid}>
+        //     {
+        //       exerciseData.map((exercise) => {
+        //         return exercise.days && exercise.days.includes(day) && (
+        //           // <Card variant="outlined">{exercise.id}</Card>
+        //           <NextLink href={`/exercises/${exercise.id}`}>
+        //             <Paper
+        //               sx={{
+        //                 width: '100%',
+        //                 height: '100%',
+        //                 opacity: 0.9,
+        //                 textAlign: 'center',
+        //                 verticalAlign: 'middle',
+        //                 color: 'white',
+        //                 backgroundColor: new Date(exercise.latest).toDateString() === today.toDateString() ? '#358d6c' : '#1f1e1e',
+        //               }}
+        //               elevation={5}
+        //             >
+        //               {exercise.id}
+        //             </Paper>
+        //           </NextLink>
+        //         )
+        //         // <Button variant="contained" color='primary' >{exercise.id}</Button>
+        //         // return exercise.days && exercise.days.includes(day) && <Paper elevation={5}>{exercise.id}</Paper>
+        //       })
+        //     }
+        //   </div>
+        // </section>)
+        categorys.map((category) => <section>
+          <p className={styles.dayTitle} id={category}>{category.toUpperCase()}</p>
           <div className={styles.exerciseGrid}>
             {
               exerciseData.map((exercise) => {
-                return exercise.days && exercise.days.includes(day) && (
+                return exercise.category && exercise.category == category && exercise.active &&(
                   // <Card variant="outlined">{exercise.id}</Card>
                   <NextLink href={`/exercises/${exercise.id}`}>
                     <Paper 
@@ -91,9 +124,9 @@ export default function Home() {
               })
             }
           </div>
-        </section>)
+        </section>) 
       }
-    {/* </div> */}
+      {/* </div> */}
     </Layout>
   )
 }

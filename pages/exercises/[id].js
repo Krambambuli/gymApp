@@ -277,11 +277,12 @@ export default function Exercise({ name }) {
                       defaultValue={sets[set].reps}
                     />
                   </Grid>
+                  {/* make to text and limitate that float is possible */}
                   <Grid item xs={6}>
                     <TextField
                       id={`set_${set}_kg`}
                       label="Kg"
-                      type="number"
+                      type="text"
                       defaultValue={sets[set].kg}
                     />
                   </Grid>
